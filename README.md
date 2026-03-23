@@ -1,27 +1,83 @@
+<div align="center">
+
 # @mcp-edge/amqp
 
-Reusable AMQP edge execution library for MCP worker deployments.
+**Typed AMQP execution channel for MCP edge workers**
 
-This package provides versioned job and event contracts, routing helpers, AMQP consumer and publisher primitives, compatibility validation, and in-memory testing helpers for edge execution flows.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm](https://img.shields.io/badge/npm-%40mcp--edge%2Famqp-cb3837?logo=npm)](https://www.npmjs.com/package/@mcp-edge/amqp)
 
-## Scope
+Versioned job and event contracts, AMQP consumer/publisher primitives, compatibility validation,
+and in-memory testing helpers — everything an edge worker needs to talk to the MCP control plane.
 
-This library is responsible for:
+</div>
 
-- typed execution job envelopes
-- typed ack, progress, result, and failure event envelopes
-- broker-facing consumer and publisher primitives
-- routing and queue naming conventions for edge execution traffic
-- envelope and compatibility validation
-- reusable health and mock testing helpers
+---
 
-This library does not implement:
+## Overview
 
-- MCP Transport
-- JSON-RPC request or response semantics
-- reply-queue driven execution flows
-- control-plane business logic
-- server-specific worker behavior
+`@mcp-edge/amqp` is a focused TypeScript library that provides the AMQP messaging layer for MCP edge worker deployments. It handles the broker communication so your worker code can focus on tool execution.
+
+```mermaid
+flowchart LR
+  subgraph CONTROL["Control Plane"]
+    CP["Dispatches execution.job<br/>Receives lifecycle events"]
+  end
+
+  subgraph LIBRARY["Library"]
+    VALIDATION["Typed job envelopes<br/>Zod runtime validation"]
+    FLOW["Ack / Progress / Result flow<br/>Compatibility enforcement"]
+    RESILIENCE["Auto-reconnect<br/>Backpressure handling"]
+  end
+
+  subgraph BROKER["Broker"]
+    RMQ["RabbitMQ<br/>Exchanges and queues"]
+  end
+
+  CP -->|producer path:<br>execution.job| VALIDATION
+  VALIDATION --> FLOW
+  FLOW -->|transport path:<br>publish/consume| RMQ
+  RMQ -->|consumer path:<br>deliveries| RESILIENCE
+  RESILIENCE -->|consumer path:<br>ack/progress/result/failure| CP
+
+  classDef producer fill:#fff4d6,stroke:#b7791f,color:#5f370e,stroke-width:2px;
+  classDef library fill:#e8f1ff,stroke:#2563eb,color:#0f172a,stroke-width:2px;
+  classDef broker fill:#e8fff3,stroke:#0f766e,color:#134e4a,stroke-width:2px;
+
+  class CP producer;
+  class VALIDATION,FLOW,RESILIENCE library;
+  class RMQ broker;
+
+  linkStyle 0 stroke:#b7791f,stroke-width:3px;
+  linkStyle 1 stroke:#2563eb,stroke-width:2px;
+  linkStyle 2 stroke:#0f766e,stroke-width:3px;
+  linkStyle 3 stroke:#0f766e,stroke-width:3px;
+  linkStyle 4 stroke:#2563eb,stroke-width:3px;
+```
+
+### What this library does
+
+| Capability | Description |
+|:---|:---|
+| **Typed contracts** | Versioned envelopes for jobs, acks, progress, results, and failures |
+| **Runtime validation** | Zod schemas enforce envelope shape at the boundary |
+| **Compatibility checks** | Rejects messages from incompatible producer/consumer versions |
+| **Consumer primitive** | Job consumer with automatic queue binding and reconnect lifecycle |
+| **Publisher primitive** | Event publisher with drain-wait backpressure handling |
+| **Routing helpers** | Deterministic routing keys and queue names for edge execution traffic |
+| **Health snapshots** | Structured connection/channel health for monitoring endpoints |
+| **Testing helpers** | In-memory mock edge channel for fast, broker-free unit tests |
+
+### What this library does _not_ do
+
+- MCP Transport or JSON-RPC semantics
+- Reply-queue driven execution flows
+- Control-plane business logic
+- Server-specific worker behavior
+
+---
 
 ## Installation
 
@@ -29,15 +85,9 @@ This library does not implement:
 npm install @mcp-edge/amqp
 ```
 
-## Public Modules
+> Requires **Node.js 18+** and **TypeScript 5.x** (ESM).
 
-- `@mcp-edge/amqp/config`
-- `@mcp-edge/amqp/contracts`
-- `@mcp-edge/amqp/consumer`
-- `@mcp-edge/amqp/publisher`
-- `@mcp-edge/amqp/connection`
-- `@mcp-edge/amqp/health`
-- `@mcp-edge/amqp/testing`
+---
 
 ## Quick Start
 
@@ -56,14 +106,8 @@ channel.consumer.onJob(async (job, delivery) => {
     messageType: 'execution.progress',
     messageId: 'msg-progress-1',
     timestamp: new Date().toISOString(),
-    producer: {
-      service: 'edge-worker',
-      version: '0.1.0',
-    },
-    compatibility: {
-      channelVersion: '0.1.0',
-      packageVersion: '0.1.0',
-    },
+    producer: { service: 'edge-worker', version: '0.1.0' },
+    compatibility: { channelVersion: '0.1.0', packageVersion: '0.1.0' },
     payload: {
       jobId: job.payload.jobId,
       attemptId: job.payload.attemptId,
@@ -81,7 +125,30 @@ channel.consumer.onJob(async (job, delivery) => {
 await channel.consumer.start();
 ```
 
-## Contracts-Only Example
+---
+
+## Public Modules
+
+Each module is available as a deep import for tree-shaking and focused dependency graphs:
+
+| Import path | Purpose |
+|:---|:---|
+| `@mcp-edge/amqp` | Top-level barrel — re-exports everything |
+| `@mcp-edge/amqp/config` | Channel config resolution, exchange/queue/routing defaults |
+| `@mcp-edge/amqp/contracts` | Envelope types, Zod schemas, compatibility validation |
+| `@mcp-edge/amqp/consumer` | `EdgeJobConsumer` — queue binding, job dispatch, ack/nack |
+| `@mcp-edge/amqp/publisher` | `EdgeEventPublisher` — event publishing with backpressure |
+| `@mcp-edge/amqp/connection` | `createEdgeChannel` — managed AMQP connection lifecycle |
+| `@mcp-edge/amqp/health` | `createHealthSnapshot` — structured health reporting |
+| `@mcp-edge/amqp/testing` | `createMockEdgeChannel` — in-memory test double |
+
+---
+
+## Usage Examples
+
+### Contracts only (no broker)
+
+Use the contract types and validation without connecting to a broker:
 
 ```ts
 import type { ExecutionJobEnvelope } from '@mcp-edge/amqp/contracts';
@@ -92,158 +159,173 @@ const job: ExecutionJobEnvelope = {
   messageType: 'execution.job',
   messageId: 'msg-job-1',
   timestamp: new Date().toISOString(),
-  producer: {
-    service: 'control-plane',
-    version: '1.2.0',
-  },
-  compatibility: {
-    channelVersion: '0.1.0',
-    minConsumerVersion: '0.1.0',
-  },
+  producer: { service: 'control-plane', version: '1.2.0' },
+  compatibility: { channelVersion: '0.1.0', minConsumerVersion: '0.1.0' },
   payload: {
     jobId: 'job-1',
     attemptId: 'attempt-1',
     idempotencyKey: 'job-1-attempt-1',
     timeoutMs: 30000,
-    target: {
-      siteId: 'site-a',
-      nodeId: 'node-1',
-    },
-    createdBy: {
-      controlPlane: 'mcp-od-marketplace',
-    },
-    capability: {
-      kind: 'tool',
-      name: 'search.documents',
-      version: '2026-03',
-    },
-    input: {
-      query: 'recent jobs',
-    },
+    target: { siteId: 'site-a', nodeId: 'node-1' },
+    createdBy: { controlPlane: 'mcp-od-marketplace' },
+    capability: { kind: 'tool', name: 'search.documents', version: '2026-03' },
+    input: { query: 'recent jobs' },
   },
 };
 
-validateEnvelope(job);
+validateEnvelope(job); // throws ZodError on invalid shape
 ```
 
-## Testing
-
-The package includes an in-memory mock edge channel for unit tests and contract walkthroughs.
+### Mock channel for tests
 
 ```ts
 import { createMockEdgeChannel } from '@mcp-edge/amqp/testing';
 
-const mockChannel = createMockEdgeChannel({ siteId: 'site-a', nodeId: 'node-1' });
+const mock = createMockEdgeChannel({ siteId: 'site-a', nodeId: 'node-1' });
+
+mock.consumer.onJob(async (job, delivery) => {
+  // your handler logic
+  await mock.consumer.ack(delivery);
+});
+
+await mock.consumer.start();
+await mock.simulateJob(jobEnvelope);      // dispatches to handler
+console.log(mock.publishedEvents);        // inspect published events
 ```
 
-## Environment Setup
+---
 
-Use the repository env files as follows:
+## Development
 
-- `.env.example`: committed template that documents expected variables and safe defaults.
-- `.env.local`: your machine-specific overrides (credentials, alternate broker URL), ignored by git.
+### Prerequisites
 
-Environment variables used by this repository:
+| Tool | Version |
+|:---|:---|
+| Node.js | >= 18 |
+| npm | >= 9 |
+| Docker | For integration tests (optional) |
 
-- `AMQP_INTEGRATION_URL`: used by integration tests.
-- `AMQP_EXAMPLE_URL`: used by `npm run example:rabbitmq`.
-
-Typical setup flow:
-
-1. Start from the values in `.env.example`.
-2. Put your local values in `.env.local`.
-3. Override in-shell env vars only when you need a one-off run.
-
-### Real RabbitMQ Integration
-
-You can run the integration test suite against a live RabbitMQ broker.
-
-Default broker URL:
+### Getting started
 
 ```bash
-amqp://mcp:discovery@127.0.0.1:5672
+git clone https://github.com/nagual69/AMQPConnectorforMCPEdge.git
+cd AMQPConnectorforMCPEdge
+npm install
+npm run build
+npm test
 ```
 
-Start a local broker:
+### Environment setup
+
+| File | Purpose |
+|:---|:---|
+| `.env.example` | Committed template with safe defaults |
+| `.env.local` | Your local overrides (git-ignored) |
+
+| Variable | Used by |
+|:---|:---|
+| `AMQP_INTEGRATION_URL` | Integration tests |
+| `AMQP_EXAMPLE_URL` | End-to-end RabbitMQ example |
+
+Copy the template and customize:
+
+```bash
+cp .env.example .env.local
+```
+
+### Available scripts
+
+| Command | Description |
+|:---|:---|
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm test` | Run unit tests |
+| `npm run test:unit` | Unit tests only |
+| `npm run test:integration` | Integration tests against a live broker |
+| `npm run test:all` | Unit + integration tests |
+| `npm run release:check` | Full release gate (tests + pack dry-run) |
+| `npm run example:rabbitmq` | End-to-end RabbitMQ demo |
+| `npm run docker:rabbitmq:up` | Start local RabbitMQ container |
+| `npm run docker:rabbitmq:down` | Stop local RabbitMQ container |
+
+---
+
+## RabbitMQ Integration
+
+### Start a local broker
 
 ```bash
 npm run docker:rabbitmq:up
 ```
 
-Run unit and integration tests:
+Default broker URL: `amqp://mcp:discovery@127.0.0.1:5672`
+
+### Run integration tests
 
 ```bash
-npm run test:unit
 npm run test:integration
-```
-
-On PowerShell, load the local RabbitMQ defaults for your current session:
-
-```powershell
-. .\scripts\Use-LocalRabbitMQ.ps1
 ```
 
 Override the broker URL when needed:
 
 ```bash
+# Windows
 set AMQP_INTEGRATION_URL=amqp://mcp:discovery@127.0.0.1:5672
-npm run test:integration
+
+# PowerShell
+$env:AMQP_INTEGRATION_URL = "amqp://mcp:discovery@127.0.0.1:5672"
+
+# Or load the convenience helper
+. .\scripts\Use-LocalRabbitMQ.ps1
 ```
 
-The integration script checks `AMQP_INTEGRATION_URL` first, then falls back to local defaults (`mcp:discovery` first, then `guest:guest`).
+The integration suite covers:
 
-The integration suite includes:
+- Full job lifecycle (dispatch → ack → progress → result)
+- Failure + requeue behavior via `nack(..., { requeue: true })`
 
-- a successful job lifecycle test
-- a failure-and-requeue test that verifies `nack(..., { requeue: true })` produces redelivery
+### End-to-end example
 
-## End-To-End RabbitMQ Example
-
-The repository includes a richer example that simulates:
-
-- a control-plane publisher sending an `execution.job`
-- an edge worker consuming the job through this library
-- the worker publishing ack, progress, and result events
-- a control-plane listener consuming those events from RabbitMQ
-
-Run it with:
+Simulates the complete control-plane ↔ edge-worker flow over a real broker:
 
 ```bash
 npm run example:rabbitmq
 ```
 
-Override the broker URL for the example when needed:
+The example in `examples/end-to-end-rabbitmq.mjs` demonstrates a control-plane dispatching a job, an edge worker consuming it, and the round-trip event flow back to the control plane.
 
-```bash
-set AMQP_EXAMPLE_URL=amqp://mcp:discovery@127.0.0.1:5672
-npm run example:rabbitmq
+---
+
+## Project Structure
+
+```
+src/
+├── config/          # Channel configuration and routing defaults
+├── connection/      # Managed AMQP connection lifecycle
+├── consumer/        # EdgeJobConsumer — queue binding and job dispatch
+├── contracts/       # Envelope types, Zod schemas, compatibility logic
+├── health/          # Structured health snapshots
+├── publisher/       # EdgeEventPublisher — event publishing with backpressure
+├── testing/         # In-memory mock edge channel
+└── __tests__/       # Unit and integration test suites
 ```
 
-The example script lives in `examples/end-to-end-rabbitmq.mjs` and uses a live broker rather than the mock channel.
+---
 
-## Release Files
+## Release
 
-- `CHANGELOG.md` tracks released and unreleased changes.
-- `docs/RELEASE_POLICY.md` defines the first-publish and ongoing release rules.
+- See [CHANGELOG.md](CHANGELOG.md) for release history.
+- See [docs/RELEASE_POLICY.md](docs/RELEASE_POLICY.md) for versioning rules and release gates.
 
-## Publish Readiness
-
-Package publish metadata is defined in `package.json`:
-
-- repository, homepage, and issue tracker links
-- `publishConfig.access = public`
-- `publishConfig.provenance = true`
-
-Run a first-release readiness check with:
+Verify publish readiness:
 
 ```bash
 npm run release:check
 ```
 
-## Development
+Published as a **public scoped package** with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) enabled.
 
-```bash
-npm install
-npm run build
-npm test
-```
+---
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT) — see `package.json` for details.
