@@ -100,7 +100,7 @@ Status legend:
 | H-02 | Routing-key generation and namespace separation | `src/__tests__/edge-library.test.ts` | PASS | Covered |
 | H-03 | Consumer ack/nack semantics | `src/__tests__/edge-library.test.ts`, integration requeue test | PASS | Covered |
 | H-04 | Publication of ack/progress/result/failure events | `src/__tests__/edge-library.test.ts`, `src/__tests__/rabbitmq.integration.test.ts` | PASS | Covered |
-| H-05 | Compatibility validation behavior | `src/__tests__/edge-library.test.ts` | PARTIAL | Basic unit check exists, runtime-path strict checks need expanded tests |
+| H-05 | Compatibility validation behavior | `src/__tests__/edge-library.test.ts`, runtime consumer/publisher rejection tests | PASS | Unit coverage includes missing-version and below-minimum rejection in consumer and publisher paths |
 | H-06 | Mock-broker round trips without MCP transport imports | `src/testing/mock-edge-channel.ts`, unit tests | PASS | Covered |
 
 ## I. Consumer/Producer Expectations and Multi-Consumer Reuse
@@ -114,13 +114,13 @@ Status legend:
 
 | ID | Requirement | Evidence (Code/Docs/Tests) | Status | Notes |
 |---|---|---|---|---|
-| J-01 | Connection lifecycle and reconnect/recovery patterns | `src/connection/connection-manager.ts`, consumer reconnect hook | PARTIAL | Initial implementation complete; reconnect tests pending |
+| J-01 | Connection lifecycle and reconnect/recovery patterns | `src/connection/connection-manager.ts`, consumer reconnect hook, `src/__tests__/edge-library.test.ts` | PASS | Explicit unit coverage verifies consumer re-initializes after reconnect |
 | J-02 | Safe ack/nack handling | `src/consumer/edge-job-consumer.ts`, integration tests | PASS | Implemented |
 | J-03 | Validation utilities and config validation | `src/contracts/*`, `src/config/index.ts` | PASS | Implemented |
 | J-04 | Routing strategy patterns | `src/config/index.ts` | PASS | Implemented |
 | J-05 | Max message size checks | `src/consumer/edge-job-consumer.ts` | PASS | Oversized payload nacked |
 | J-06 | Credential-redaction practices | N/A in current logs/output | PARTIAL | No explicit redaction utility yet |
-| J-07 | Backpressure hooks | `src/publisher/edge-event-publisher.ts` | PARTIAL | Drain wait added; no dedicated stress tests yet |
+| J-07 | Backpressure hooks | `src/publisher/edge-event-publisher.ts`, `src/__tests__/edge-library.test.ts` | PASS | Unit coverage verifies drain-wait success and timeout failure paths |
 | J-08 | Compatibility slice with marketplace and edge runtime | Integration tests use generic job/event cycle | PARTIAL | Simulated generic compatibility, no external repo contract test |
 
 ## K. Release and Governance Rules
@@ -133,8 +133,8 @@ Status legend:
 
 ## Current Remediation Roll-Up
 
-- Finding 1: PARTIAL (code added; reconnect behavior tests pending).
-- Finding 2: PARTIAL (code added in runtime paths; strict test cases pending).
-- Finding 3: PARTIAL (drain handling added; stress/backpressure tests pending).
-- Finding 4: PARTIAL (build split added; packaging validation pending after script changes).
-- Finding 5: PARTIAL (scoped package identity updated in metadata/docs; downstream migration notes pending).
+- Finding 1: PASS (reconnect lifecycle implemented and explicit unit test coverage added).
+- Finding 2: PASS (runtime-path enforcement covered with strict missing-version and below-minimum rejection tests).
+- Finding 3: PASS (drain handling implemented with explicit success and timeout unit tests).
+- Finding 4: PASS (build/test outputs split and release dry-run validation completed).
+- Finding 5: PASS (scoped package identity aligned across package metadata and docs).

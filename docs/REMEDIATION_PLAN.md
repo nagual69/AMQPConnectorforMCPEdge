@@ -6,11 +6,11 @@ This document tracks remediation work for the five findings identified in the co
 
 | Finding | Severity | Status | Scope |
 |---|---|---|---|
-| F1: Reconnect and channel recovery gaps | High | In progress | `src/connection`, `src/consumer` |
-| F2: Compatibility checks not enforced in runtime paths | Medium | In progress | `src/contracts`, `src/consumer`, `src/publisher` |
-| F3: Publisher backpressure handling missing | Medium | In progress | `src/publisher`, tests |
-| F4: Published artifact includes compiled tests | Low | In progress | build/test configs, `package.json` |
-| F5: Public module naming divergence from spec recommendation | Low | In progress | `package.json`, docs |
+| F1: Reconnect and channel recovery gaps | High | Completed | `src/connection`, `src/consumer`, tests |
+| F2: Compatibility checks not enforced in runtime paths | Medium | Completed | `src/contracts`, `src/consumer`, `src/publisher`, tests |
+| F3: Publisher backpressure handling missing | Medium | Completed | `src/publisher`, tests |
+| F4: Published artifact includes compiled tests | Low | Completed | build/test configs, `package.json` |
+| F5: Public module naming divergence from spec recommendation | Low | Completed | `package.json`, docs |
 
 ## Finding F1: Reconnect and Channel Recovery
 

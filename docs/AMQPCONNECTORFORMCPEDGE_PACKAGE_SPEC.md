@@ -355,7 +355,7 @@ Current coverage status:
 - PASS: routing-key generation and namespace separation
 - PASS: consumer ack/nack semantics and requeue behavior
 - PASS: publication of ack/progress/result/failure events
-- PARTIAL: strict runtime-path compatibility rejection scenarios need expanded focused tests
+- PASS: strict runtime-path compatibility rejection scenarios (missing version and below-minimum version) are covered in unit tests
 - PARTIAL: reconnect and publisher backpressure stress-path tests are tracked as in-progress remediation
 
 ## Consumer Expectations
