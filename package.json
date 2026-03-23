@@ -1,5 +1,5 @@
 {
-  "name": "@mcp-edge/amqp",
+  "name": "@nagual69/amqp-mcp-edge",
   "version": "0.1.0",
   "description": "Reusable AMQP edge execution library for MCP worker deployments",
   "license": "MIT",

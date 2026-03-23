@@ -2,32 +2,39 @@
 
 Create `AMQPConnectorforMCPEdge` as a first-class reusable MCP edge library with its own versioned ownership and independent release cadence. The recommended approach is to make this repo the generic AMQP execution-channel package for edge-style MCP deployments, analogous to how `AMQPConnectorforMCP` serves as a generic MCP transport package. This library should be reusable by `mcp_open_discovery_3_0` and by future MCP servers that need outbound-only edge workers, control-plane job dispatch, progress events, and result publication.
 
+**Current Status Snapshot**
+
+- Overall status: Mostly completed.
+- Implemented and validated: package scope, public modules, worker-oriented runtime primitives, routing and namespace separation, envelope validation, compatibility enforcement, reconnect handling, backpressure handling, mock-broker tests, live RabbitMQ integration tests, release policy, changelog, and package identity alignment.
+- Remaining partial items: explicit credential-redaction utility/practice and an external cross-repo compatibility slice with real marketplace and edge runtime repositories.
+- Evidence sources: `docs/TRACEABILITY_MATRIX.md`, `docs/REMEDIATION_PLAN.md`, `README.md`, `src/__tests__/edge-library.test.ts`, and `src/__tests__/rabbitmq.integration.test.ts`.
+
 **Steps**
-1. Phase 1: Freeze the repo role. This repo is a reusable MCP edge library for AMQP-based execution channels. It is not application business logic and it is not a server-specific implementation detail.
-2. Phase 1: Define the library contract in generic terms so it can serve multiple MCP servers, not just Open Discovery. The contract should include `ExecutionJobEnvelope`, `JobAck`, `JobProgressEvent`, `JobResultEvent`, `JobFailureEvent`, attempt metadata, idempotency metadata, target identity, capability/version headers, and compatibility negotiation fields.
-3. Phase 1: Define explicit non-goals. Do not implement the MCP `Transport` interface here, do not model the protocol as JSON-RPC request/response, and do not rely on `replyTo` plus `correlationId` as the primary execution lifecycle pattern.
-4. Phase 1: Define the packaging goal clearly: publish and version this library as the shared dependency that multiple edge-capable MCP runtimes can consume.
-5. Phase 1: Decide whether the library exposes direct `amqplib` bindings or a thin adapter abstraction so consuming runtimes can swap AMQP client implementations later without changing the public job/event contract.
-6. Phase 2: Pull forward only the beneficial reusable foundations from `AMQPConnectorforMCP`: connection lifecycle management, reconnect/channel recovery patterns, safe ack/nack handling, validation utilities, config validation, routing-key strategy patterns, max-message-size checks, credential-redaction practices, and mocked broker testing patterns.
-7. Phase 2: Define exchange, queue, routing-key, and namespace conventions specifically for reusable edge execution so job traffic can never be confused with MCP transport traffic.
-8. Phase 2: Provide library primitives aligned to worker semantics rather than transport semantics: consumer startup, job receipt, ack/nack, retry signaling, progress emission, result emission, terminal failure emission, health reporting, and backpressure hooks.
-9. Phase 2: Add schema validation and versioning for every public envelope and metadata block so the control plane and any consuming edge runtime can evolve independently within clear compatibility rules.
-10. Phase 2: Add documentation and examples for multiple-consumer scenarios: Open Discovery as one consumer, future MCP edge runtimes as additional consumers, and control-plane publishers as separate producers.
-11. Phase 3: Build one compatibility slice with `mcp-od-marketplace` and `mcp_open_discovery_3_0`: publish one generic job envelope, consume it through the library, emit progress, emit final result, and verify schema-version compatibility end to end.
-12. Phase 3: Publish docs that make the repo boundary unambiguous: this is the reusable MCP edge execution library for AMQP, while `AMQPConnectorforMCP` remains the reusable MCP transport library for local/direct client-server transport.
-13. Phase 4: Establish release ownership: semantic versioning, compatibility guarantees, changelog policy, and a clear deprecation path so downstream MCP servers can adopt the library safely.
+1. Phase 1: Freeze the repo role. This repo is a reusable MCP edge library for AMQP-based execution channels. It is not application business logic and it is not a server-specific implementation detail. Status: Completed.
+2. Phase 1: Define the library contract in generic terms so it can serve multiple MCP servers, not just Open Discovery. The contract should include `ExecutionJobEnvelope`, `JobAck`, `JobProgressEvent`, `JobResultEvent`, `JobFailureEvent`, attempt metadata, idempotency metadata, target identity, capability/version headers, and compatibility negotiation fields. Status: Completed.
+3. Phase 1: Define explicit non-goals. Do not implement the MCP `Transport` interface here, do not model the protocol as JSON-RPC request/response, and do not rely on `replyTo` plus `correlationId` as the primary execution lifecycle pattern. Status: Completed.
+4. Phase 1: Define the packaging goal clearly: publish and version this library as the shared dependency that multiple edge-capable MCP runtimes can consume. Status: Completed.
+5. Phase 1: Decide whether the library exposes direct `amqplib` bindings or a thin adapter abstraction so consuming runtimes can swap AMQP client implementations later without changing the public job/event contract. Status: Completed for the current release as direct `amqplib` bindings; adapter abstraction remains a future design option, not an implemented goal.
+6. Phase 2: Pull forward only the beneficial reusable foundations from `AMQPConnectorforMCP`: connection lifecycle management, reconnect/channel recovery patterns, safe ack/nack handling, validation utilities, config validation, routing-key strategy patterns, max-message-size checks, credential-redaction practices, and mocked broker testing patterns. Status: Mostly completed; credential-redaction practices remain partial.
+7. Phase 2: Define exchange, queue, routing-key, and namespace conventions specifically for reusable edge execution so job traffic can never be confused with MCP transport traffic. Status: Completed.
+8. Phase 2: Provide library primitives aligned to worker semantics rather than transport semantics: consumer startup, job receipt, ack/nack, retry signaling, progress emission, result emission, terminal failure emission, health reporting, and backpressure hooks. Status: Completed.
+9. Phase 2: Add schema validation and versioning for every public envelope and metadata block so the control plane and any consuming edge runtime can evolve independently within clear compatibility rules. Status: Completed.
+10. Phase 2: Add documentation and examples for multiple-consumer scenarios: Open Discovery as one consumer, future MCP edge runtimes as additional consumers, and control-plane publishers as separate producers. Status: Mostly completed; generic documentation and examples exist, but no external second-runtime compatibility slice has been executed.
+11. Phase 3: Build one compatibility slice with `mcp-od-marketplace` and `mcp_open_discovery_3_0`: publish one generic job envelope, consume it through the library, emit progress, emit final result, and verify schema-version compatibility end to end. Status: Partial; simulated by generic integration tests, but not yet proven via an external cross-repo contract test.
+12. Phase 3: Publish docs that make the repo boundary unambiguous: this is the reusable MCP edge execution library for AMQP, while `AMQPConnectorforMCP` remains the reusable MCP transport library for local/direct client-server transport. Status: Completed.
+13. Phase 4: Establish release ownership: semantic versioning, compatibility guarantees, changelog policy, and a clear deprecation path so downstream MCP servers can adopt the library safely. Status: Mostly completed; release policy, changelog, and semver guidance are in place, while future deprecation-path detail can be expanded when needed.
 
 **Concrete Package APIs**
 
 The first public surface should be small, explicit, and worker-oriented.
 
 Recommended package modules:
-- `@mcp-edge/amqp/config`
-- `@mcp-edge/amqp/contracts`
-- `@mcp-edge/amqp/publisher`
-- `@mcp-edge/amqp/consumer`
-- `@mcp-edge/amqp/health`
-- `@mcp-edge/amqp/testing`
+- `@nagual69/amqp-mcp-edge/config`
+- `@nagual69/amqp-mcp-edge/contracts`
+- `@nagual69/amqp-mcp-edge/publisher`
+- `@nagual69/amqp-mcp-edge/consumer`
+- `@nagual69/amqp-mcp-edge/health`
+- `@nagual69/amqp-mcp-edge/testing`
 
 Recommended exported types:
 - `EdgeChannelConfig`
@@ -233,6 +240,8 @@ export type JobFailureEvent = BaseEdgeEnvelope<'execution.failure', JobFailurePa
 
 **Routing And Namespace Contract**
 
+Status: Completed.
+
 The library should standardize routing separately from MCP transport routing.
 
 Recommended exchange names:
@@ -255,6 +264,8 @@ Recommended queue ownership:
 
 **Versioning Rules**
 
+Status: Completed.
+
 The library should define simple, explicit compatibility rules:
 - `specVersion` changes only for breaking envelope changes
 - additive payload fields are minor-version compatible
@@ -263,6 +274,8 @@ The library should define simple, explicit compatibility rules:
 - publishers may require minimum consumer versions via `compatibility.minConsumerVersion`
 
 **Testing Contract**
+
+Status: Completed.
 
 The initial test surface should verify:
 1. envelope validation for all public message types
@@ -280,14 +293,20 @@ The initial test surface should verify:
 - `https://github.com/nagual69/AMQPConnectorforMCP/tree/main/AUDIT.md` - preserve the lessons already learned about transport contract clarity, recovery, validation, and application-logic separation.
 
 **Verification**
-1. Verify this repo can be explained as a reusable MCP edge library without describing it as an MCP `Transport` implementation.
-2. Verify job envelopes, progress events, and result events are versioned, validated, and independent from JSON-RPC response correlation.
-3. Verify exchange and queue namespaces cannot collide with MCP-over-AMQP transport namespaces from `AMQPConnectorforMCP`.
-4. Verify the library can be consumed by `mcp_open_discovery_3_0` and by at least one hypothetical second MCP server without server-specific protocol leakage.
-5. Verify the package can later support alternate boundary adapters or implementations without rewriting control-plane business logic.
-6. Verify semantic versioning and release notes can communicate protocol changes cleanly to downstream runtimes.
+
+Overall verification status: Mostly completed.
+
+1. Verify this repo can be explained as a reusable MCP edge library without describing it as an MCP `Transport` implementation. Status: Completed.
+2. Verify job envelopes, progress events, and result events are versioned, validated, and independent from JSON-RPC response correlation. Status: Completed.
+3. Verify exchange and queue namespaces cannot collide with MCP-over-AMQP transport namespaces from `AMQPConnectorforMCP`. Status: Completed.
+4. Verify the library can be consumed by `mcp_open_discovery_3_0` and by at least one hypothetical second MCP server without server-specific protocol leakage. Status: Partial; generic reuse and protocol isolation are implemented, but no external second-repo contract verification has been executed.
+5. Verify the package can later support alternate boundary adapters or implementations without rewriting control-plane business logic. Status: Completed at the contract boundary level; runtime currently uses direct `amqplib` bindings.
+6. Verify semantic versioning and release notes can communicate protocol changes cleanly to downstream runtimes. Status: Completed.
 
 **Decisions**
+
+Status: Completed and reflected in the current implementation.
+
 - Include: reusable edge execution envelopes, producer/consumer helpers, validation, compatibility/versioning, worker-oriented delivery semantics, and generic packaging for multiple MCP servers.
 - Exclude: direct MCP client/server transport implementation and control-plane business rules.
 - Recommendation: treat this repo as the long-lived reusable AMQP edge library, parallel in purpose to `AMQPConnectorforMCP` but focused on edge execution channels instead of MCP transport semantics.

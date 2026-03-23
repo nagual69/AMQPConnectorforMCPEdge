@@ -26,7 +26,7 @@ The package is not responsible for:
 ## Package Identity
 
 Recommended package name:
-- `@mcp-edge/amqp`
+- `@nagual69/amqp-mcp-edge`
 
 Recommended repository name:
 - `AMQPConnectorforMCPEdge`
@@ -37,13 +37,13 @@ Recommended description:
 ## Public Modules
 
 Recommended public module layout:
-- `@mcp-edge/amqp/config`
-- `@mcp-edge/amqp/contracts`
-- `@mcp-edge/amqp/consumer`
-- `@mcp-edge/amqp/publisher`
-- `@mcp-edge/amqp/connection`
-- `@mcp-edge/amqp/health`
-- `@mcp-edge/amqp/testing`
+- `@nagual69/amqp-mcp-edge/config`
+- `@nagual69/amqp-mcp-edge/contracts`
+- `@nagual69/amqp-mcp-edge/consumer`
+- `@nagual69/amqp-mcp-edge/publisher`
+- `@nagual69/amqp-mcp-edge/connection`
+- `@nagual69/amqp-mcp-edge/health`
+- `@nagual69/amqp-mcp-edge/testing`
 
 Recommended repo source layout:
 

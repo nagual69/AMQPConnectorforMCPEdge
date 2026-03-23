@@ -18,7 +18,7 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ### Changed
 
-- package identity updated to scoped name `@mcp-edge/amqp`
+- package identity updated to scoped name `@nagual69/amqp-mcp-edge`
 - production build now excludes test compilation outputs from published `dist`
 - added reconnect and channel re-initialization workflow in connection lifecycle
 - runtime compatibility checks are now enforced by consumer and publisher paths

@@ -1,13 +1,13 @@
 <div align="center">
 
-# @mcp-edge/amqp
+# @nagual69/amqp-mcp-edge
 
 **Typed AMQP execution channel for MCP edge workers**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![npm](https://img.shields.io/badge/npm-%40mcp--edge%2Famqp-cb3837?logo=npm)](https://www.npmjs.com/package/@mcp-edge/amqp)
+[![npm](https://img.shields.io/badge/npm-%40nagual69%2Famqp--mcp--edge-cb3837?logo=npm)](https://www.npmjs.com/package/@nagual69/amqp-mcp-edge)
 
 Versioned job and event contracts, AMQP consumer/publisher primitives, compatibility validation,
 and in-memory testing helpers — everything an edge worker needs to talk to the MCP control plane.
@@ -18,7 +18,7 @@ and in-memory testing helpers — everything an edge worker needs to talk to the
 
 ## Overview
 
-`@mcp-edge/amqp` is a focused TypeScript library that provides the AMQP messaging layer for MCP edge worker deployments. It handles the broker communication so your worker code can focus on tool execution.
+`@nagual69/amqp-mcp-edge` is a focused TypeScript library that provides the AMQP messaging layer for MCP edge worker deployments. It handles the broker communication so your worker code can focus on tool execution.
 
 ```mermaid
 flowchart LR
@@ -82,7 +82,7 @@ flowchart LR
 ## Installation
 
 ```bash
-npm install @mcp-edge/amqp
+npm install @nagual69/amqp-mcp-edge
 ```
 
 > Requires **Node.js 18+** and **TypeScript 5.x** (ESM).
@@ -92,7 +92,7 @@ npm install @mcp-edge/amqp
 ## Quick Start
 
 ```ts
-import { createEdgeChannel } from '@mcp-edge/amqp';
+import { createEdgeChannel } from '@nagual69/amqp-mcp-edge';
 
 const channel = await createEdgeChannel({
   amqpUrl: 'amqp://localhost:5672',
@@ -133,14 +133,14 @@ Each module is available as a deep import for tree-shaking and focused dependenc
 
 | Import path | Purpose |
 |:---|:---|
-| `@mcp-edge/amqp` | Top-level barrel — re-exports everything |
-| `@mcp-edge/amqp/config` | Channel config resolution, exchange/queue/routing defaults |
-| `@mcp-edge/amqp/contracts` | Envelope types, Zod schemas, compatibility validation |
-| `@mcp-edge/amqp/consumer` | `EdgeJobConsumer` — queue binding, job dispatch, ack/nack |
-| `@mcp-edge/amqp/publisher` | `EdgeEventPublisher` — event publishing with backpressure |
-| `@mcp-edge/amqp/connection` | `createEdgeChannel` — managed AMQP connection lifecycle |
-| `@mcp-edge/amqp/health` | `createHealthSnapshot` — structured health reporting |
-| `@mcp-edge/amqp/testing` | `createMockEdgeChannel` — in-memory test double |
+| `@nagual69/amqp-mcp-edge` | Top-level barrel — re-exports everything |
+| `@nagual69/amqp-mcp-edge/config` | Channel config resolution, exchange/queue/routing defaults |
+| `@nagual69/amqp-mcp-edge/contracts` | Envelope types, Zod schemas, compatibility validation |
+| `@nagual69/amqp-mcp-edge/consumer` | `EdgeJobConsumer` — queue binding, job dispatch, ack/nack |
+| `@nagual69/amqp-mcp-edge/publisher` | `EdgeEventPublisher` — event publishing with backpressure |
+| `@nagual69/amqp-mcp-edge/connection` | `createEdgeChannel` — managed AMQP connection lifecycle |
+| `@nagual69/amqp-mcp-edge/health` | `createHealthSnapshot` — structured health reporting |
+| `@nagual69/amqp-mcp-edge/testing` | `createMockEdgeChannel` — in-memory test double |
 
 ---
 
@@ -151,8 +151,8 @@ Each module is available as a deep import for tree-shaking and focused dependenc
 Use the contract types and validation without connecting to a broker:
 
 ```ts
-import type { ExecutionJobEnvelope } from '@mcp-edge/amqp/contracts';
-import { validateEnvelope } from '@mcp-edge/amqp/contracts';
+import type { ExecutionJobEnvelope } from '@nagual69/amqp-mcp-edge/contracts';
+import { validateEnvelope } from '@nagual69/amqp-mcp-edge/contracts';
 
 const job: ExecutionJobEnvelope = {
   specVersion: '1.0',
@@ -179,7 +179,7 @@ validateEnvelope(job); // throws ZodError on invalid shape
 ### Mock channel for tests
 
 ```ts
-import { createMockEdgeChannel } from '@mcp-edge/amqp/testing';
+import { createMockEdgeChannel } from '@nagual69/amqp-mcp-edge/testing';
 
 const mock = createMockEdgeChannel({ siteId: 'site-a', nodeId: 'node-1' });
 

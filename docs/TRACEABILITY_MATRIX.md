@@ -27,7 +27,7 @@ Status legend:
 
 | ID | Requirement | Evidence (Code/Docs/Tests) | Status | Notes |
 |---|---|---|---|---|
-| B-01 | Recommended package name `@mcp-edge/amqp` | `package.json`, spec, `README.md` | PASS | Scoped package identity aligned across metadata and docs |
+| B-01 | Published package name `@nagual69/amqp-mcp-edge` | `package.json`, spec, `README.md` | PASS | Scoped package identity aligned across metadata and docs |
 | B-02 | Repository name recommendation | Current repository name | PASS | Matches recommendation |
 | B-03 | Public module layout includes config/contracts/consumer/publisher/connection/health/testing | `src/*/index.ts`, `package.json` exports | PASS | All modules exported |
 | B-04 | Source layout matches recommended structure | `src/` tree | PASS | Layout aligned |

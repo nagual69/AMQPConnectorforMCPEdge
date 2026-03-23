@@ -79,10 +79,10 @@ Publisher ignored `channel.publish` flow-control signaling and had no drain wait
 ## Finding F5: Package/Module Naming Divergence
 
 ### Problem
-Implementation used `amqp-mcp-edge/*` while spec recommendation was `@mcp-edge/amqp/*`.
+Implementation used `amqp-mcp-edge/*` while the final published package identity is `@nagual69/amqp-mcp-edge/*`.
 
 ### Remediation Steps
-1. Update package name to `@mcp-edge/amqp`.
+1. Update package name to `@nagual69/amqp-mcp-edge`.
 2. Update README usage and module references to scoped package imports.
 3. Update release docs/changelog references.
 4. Validate package metadata and dry-run publish flow.

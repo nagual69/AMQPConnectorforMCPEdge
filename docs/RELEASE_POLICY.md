@@ -2,7 +2,7 @@
 
 ## Package Scope
 
-`@mcp-edge/amqp` is a reusable AMQP execution-channel library for MCP edge workers. It is versioned and released independently from any single MCP server or control plane.
+`@nagual69/amqp-mcp-edge` is a reusable AMQP execution-channel library for MCP edge workers. It is versioned and released independently from any single MCP server or control plane.
 
 ## Versioning Rules
 
