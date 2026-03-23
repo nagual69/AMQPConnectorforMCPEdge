@@ -1,0 +1,92 @@
+{
+  "name": "@mcp-edge/amqp",
+  "version": "0.1.0",
+  "description": "Reusable AMQP edge execution library for MCP worker deployments",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nagual69/AMQPConnectorforMCPEdge.git"
+  },
+  "homepage": "https://github.com/nagual69/AMQPConnectorforMCPEdge#readme",
+  "bugs": {
+    "url": "https://github.com/nagual69/AMQPConnectorforMCPEdge/issues"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "default": "./dist/contracts/index.js"
+    },
+    "./consumer": {
+      "types": "./dist/consumer/index.d.ts",
+      "default": "./dist/consumer/index.js"
+    },
+    "./publisher": {
+      "types": "./dist/publisher/index.d.ts",
+      "default": "./dist/publisher/index.js"
+    },
+    "./connection": {
+      "types": "./dist/connection/index.d.ts",
+      "default": "./dist/connection/index.js"
+    },
+    "./health": {
+      "types": "./dist/health/index.d.ts",
+      "default": "./dist/health/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "docs/RELEASE_POLICY.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "clean:dist": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "clean:dist-test": "node -e \"require('node:fs').rmSync('dist-test', { recursive: true, force: true })\"",
+    "build": "npm run clean:dist && tsc -p tsconfig.json",
+    "build:test": "npm run clean:dist-test && tsc -p tsconfig.test.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run test:unit",
+    "test:unit": "npm run build && npm run build:test && node --test dist-test/__tests__/edge-library.test.js",
+    "test:integration": "npm run build && npm run build:test && node --test dist-test/__tests__/rabbitmq.integration.test.js",
+    "test:all": "npm run test:unit && npm run test:integration",
+    "example:rabbitmq": "npm run build && node examples/end-to-end-rabbitmq.mjs",
+    "docker:rabbitmq:up": "docker compose -f docker/docker-compose.rabbitmq.yml up -d",
+    "docker:rabbitmq:down": "docker compose -f docker/docker-compose.rabbitmq.yml down",
+    "docker:rabbitmq:logs": "docker compose -f docker/docker-compose.rabbitmq.yml logs rabbitmq",
+    "release:check": "npm run test:all && npm pack --dry-run"
+  },
+  "keywords": [
+    "amqp",
+    "mcp",
+    "edge",
+    "workers"
+  ],
+  "dependencies": {
+    "amqplib": "^0.10.8",
+    "zod": "^3.25.64"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  }
+}
